@@ -16,6 +16,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.conf import settings
 #from django.utils.translation import ugettext_lazy as _
 from user_profile.models import UserProfile, Customer, Staff
 #from user_profile.models import Agent
@@ -23,6 +24,11 @@ from user_profile.models import UserProfile, Customer, Staff
 
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
+    if settings.NEWFIES_DIALER_ENGINE == 'plivo':
+        exclude = ('userprofile_gateway',)
+    if settings.NEWFIES_DIALER_ENGINE == 'esl':
+        exclude = ('plivo_subaccount',)
+
 
 
 class StaffAdmin(UserAdmin):
@@ -48,7 +54,6 @@ class StaffAdmin(UserAdmin):
 #         qs = qs.filter(Q(is_staff=False) & Q(is_superuser=False))
 #         ##TODO: We might want something like this : & Q(user_profile__is_agent=True)
 #         return qs
-
 
 class CustomerAdmin(StaffAdmin):
 

@@ -222,6 +222,8 @@ class Campaign(Model):
                                       verbose_name=_('timeout on call'),
                                       help_text=_("connection timeout in seconds"))
     aleg_gateway = models.ForeignKey(Gateway, verbose_name=_("A-Leg gateway"),
+                                     default=None,
+                                     blank=True,null=True,
                                      related_name="A-Leg Gateway",
                                      help_text=_("select outbound gateway"))
     content_type = models.ForeignKey(ContentType, verbose_name=_("type"),

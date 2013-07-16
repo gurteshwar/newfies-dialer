@@ -19,6 +19,7 @@ from common.language_field import LanguageField
 from django_countries import CountryField
 from dialer_gateway.models import Gateway
 from dialer_settings.models import DialerSetting
+from plivo_cloud.models import PlivoSubAccount
 
 
 class UserProfile(models.Model):
@@ -76,6 +77,8 @@ class UserProfile(models.Model):
     #voip_gateway = models.ForeignKey(Gateway, verbose_name='VoIP Gateway',
     #                            help_text=_("Select VoIP Gateway"))
     userprofile_gateway = models.ManyToManyField(Gateway, verbose_name=_('gateway'))
+    plivo_subaccount = models.ForeignKey(PlivoSubAccount,null=True,blank=True,
+                                         on_delete=models.SET_NULL)
     dialersetting = models.ForeignKey(DialerSetting,
                       verbose_name=_('dialer settings'), null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)

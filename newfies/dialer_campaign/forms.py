@@ -77,6 +77,10 @@ class CampaignForm(ModelForm):
             'description': Textarea(attrs={'cols': 23, 'rows': 3}),
         }
 
+        if settings.NEWFIES_DIALER_ENGINE == 'plivo':
+            exclude = ('aleg_gateway',)
+
+
     def __init__(self, user, *args, **kwargs):
         super(CampaignForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
@@ -106,9 +110,10 @@ class CampaignForm(ModelForm):
                 dnc_list.append((l[0], l[1]))
             self.fields['dnc'].choices = dnc_list
 
-            for i in gw_list:
-                list_gw.append((i[0], i[1]))
-            self.fields['aleg_gateway'].choices = list_gw
+            if settings.NEWFIES_DIALER_ENGINE == 'esl':
+                for i in gw_list:
+                    list_gw.append((i[0], i[1]))
+                self.fields['aleg_gateway'].choices = list_gw
 
             if instance.has_been_duplicated:
                 from survey.models import Survey

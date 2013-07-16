@@ -16,7 +16,7 @@ import djcelery
 djcelery.setup_loader()
 
 # Django settings for project.
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = False
 
 ADMINS = (
@@ -31,13 +31,13 @@ APPLICATION_DIR = os.path.dirname(globals()['__file__'])
 DATABASES = {
     'default': {
         # 'postgresql_psycopg2','postgresql','sqlite3','oracle', 'django.db.backends.mysql'
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         # Database name or path to database file if using sqlite3.
-        'NAME': APPLICATION_DIR + '/database/newfies-dialer.db',
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Not used with sqlite3.
-        'PORT': '',                      # Not used with sqlite3.
+        'NAME': 'newfies_db',
+        'USER': 'newfies',                      # Not used with sqlite3.
+        'PASSWORD': 'newfies',                  # Not used with sqlite3.
+        'HOST': 'localhost',                      # Not used with sqlite3.
+        'PORT': '5432',                      # Not used with sqlite3.
         # 'OPTIONS': {
         #    'init_command': 'SET storage_engine=INNODB',
         # }
@@ -212,6 +212,7 @@ INSTALLED_APPS = (
     'dialer_gateway',
     'dialer_settings',
     'user_profile',
+    'plivo_cloud',
     'notification',
     'survey',
     'dnc',
@@ -446,8 +447,12 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
+#PLIVO CREDENTIALS
+PLIVO_AUTH_ID = 'MAOGE1YWFHNGFIMZI2MG'
+PLIVO_AUTH_TOKEN = 'YzQ1YTBlYTM5NjBmZGI2MzZlMTNmNTI4ZjUxNmZj'
+
 # ADD 'dummy','plivo','twilio','esl'
-NEWFIES_DIALER_ENGINE = 'esl'
+NEWFIES_DIALER_ENGINE = 'plivo'
 
 #TASTYPIE API
 #============

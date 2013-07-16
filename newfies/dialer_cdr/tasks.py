@@ -382,7 +382,7 @@ def check_callevent():
     logger.debug('End Loop : check_callevent')
 
 
-class task_pending_callevent(PeriodicTask):
+'''class task_pending_callevent(PeriodicTask):
     """A periodic task that checks the call events
 
     **Usage**:
@@ -398,7 +398,7 @@ class task_pending_callevent(PeriodicTask):
     @only_one(ikey="task_pending_callevent", timeout=LOCK_EXPIRE)
     def run(self, **kwargs):
         logger.info("ASK :: task_pending_callevent")
-        check_callevent()
+        check_callevent()'''
 
 
 """
@@ -479,26 +479,9 @@ def init_callrequest(callrequest_id, campaign_id, callmaxduration):
     if settings.DIALERDEBUG:
         dialout_phone_number = settings.DIALERDEBUG_PHONENUMBER
 
-    #Retrieve the Gateway for the A-Leg
-    gateways = obj_callrequest.aleg_gateway.gateways
-    gateway_id = obj_callrequest.aleg_gateway.id
-    #gateway_codecs = obj_callrequest.aleg_gateway.gateway_codecs
-    #gateway_retries = obj_callrequest.aleg_gateway.gateway_retries
-    gateway_timeouts = obj_callrequest.aleg_gateway.gateway_timeouts
-    originate_dial_string = obj_callrequest.aleg_gateway.originate_dial_string
 
     debug_query(12)
 
-    #Sanitize gateways
-    gateways = gateways.strip()
-    if gateways[-1] != '/':
-        gateways = gateways + '/'
-
-    originate_dial_string = obj_callrequest.aleg_gateway.originate_dial_string
-    if (obj_callrequest.user.userprofile.accountcode and
-       obj_callrequest.user.userprofile.accountcode > 0):
-        originate_dial_string = originate_dial_string + \
-            ',accountcode=' + str(obj_callrequest.user.userprofile.accountcode)
 
     debug_query(13)
 
@@ -522,6 +505,26 @@ def init_callrequest(callrequest_id, campaign_id, callmaxduration):
     """
 
     if settings.NEWFIES_DIALER_ENGINE.lower() == 'esl':
+
+        #Retrieve the Gateway for the A-Leg
+        gateways = obj_callrequest.aleg_gateway.gateways
+        gateway_id = obj_callrequest.aleg_gateway.id
+        #gateway_codecs = obj_callrequest.aleg_gateway.gateway_codecs
+        #gateway_retries = obj_callrequest.aleg_gateway.gateway_retries
+        gateway_timeouts = obj_callrequest.aleg_gateway.gateway_timeouts
+        originate_dial_string = obj_callrequest.aleg_gateway.originate_dial_string
+
+        #Sanitize gateways
+        gateways = gateways.strip()
+        if gateways[-1] != '/':
+            gateways = gateways + '/'
+
+        originate_dial_string = obj_callrequest.aleg_gateway.originate_dial_string
+        if (obj_callrequest.user.userprofile.accountcode and
+            obj_callrequest.user.userprofile.accountcode > 0):
+            originate_dial_string = originate_dial_string + \
+                ',accountcode=' + str(obj_callrequest.user.userprofile.accountcode)
+
         try:
             args_list = []
             send_digits = False
@@ -630,6 +633,33 @@ def init_callrequest(callrequest_id, campaign_id, callmaxduration):
             outbound_failure = True
             return False
         logger.info('Received RequestUUID :> ' + request_uuid)
+    elif settings.NEWFIES_DIALER_ENGINE.lower() == 'plivo':
+
+        import plivo 
+        try:
+            plivo_sub = obj_callrequest.user.userprofile.plivo_subaccount
+        except ObjectDoesNotExist:
+            logger.error('User %s does not have a plivo_subaccount configured' %(object_callrequest.user))
+            return False
+
+        if plivo_sub.enabled == False:
+            logger.error('Plivo Sub Account %s for user %s is disabled' %(plivo_sub,object_callrequest.user))
+            return False
+
+        auth_id = plivo_sub.auth_id
+        auth_token = plivo_sub.auth_token
+        p = plivo.RestAPI(auth_id,auth_token)
+        params = {'from': obj_callrequest.callerid, 'to': obj_callrequest.subscriber.contact.contact,
+                  'answer_url':'http://166.78.239.121:8000/plivo_cloud/answerurl','time_limit':callmaxduration}
+        r = p.make_call(params)
+
+        if r[0] == 201:
+            request_uuid = r[1]['request_uuid']
+            logger.info('Received RequestUUID :> ' + request_uuid)
+        else:
+            outbound_failure = True
+
+        
     else:
         logger.error('No other method supported!')
         obj_callrequest.status = CALLREQUEST_STATUS.FAILURE
