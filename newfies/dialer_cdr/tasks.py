@@ -650,7 +650,7 @@ def init_callrequest(callrequest_id, campaign_id, callmaxduration):
         auth_token = plivo_sub.auth_token
         p = plivo.RestAPI(auth_id,auth_token)
         params = {'from': obj_callrequest.callerid, 'to': obj_callrequest.subscriber.contact.contact,
-                  'answer_url':'http://166.78.239.121:8000/plivo_cloud/answerurl','time_limit':callmaxduration}
+                  'answer_url':'http://162.209.57.150:8000/plivo_cloud/answerurl','time_limit':callmaxduration}
         r = p.make_call(params)
 
         if r[0] == 201:
