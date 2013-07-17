@@ -323,7 +323,7 @@ class Campaign(Model):
 
     def get_campaign_type(self):
         """Get campaign type"""
-        if self.content_type.name[0:6] == 'Survey':
+        if self.content_type.name[0:6].lower() == 'survey':
             return ugettext('survey')
         return ugettext('voice app')
 
