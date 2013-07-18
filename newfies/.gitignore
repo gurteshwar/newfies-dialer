@@ -5,3 +5,4 @@ usermedia/upload/audiofiles/*.wav
 usermedia/upload/audiofiles/*.mp3
 *coverage
 cover
+*.py~
