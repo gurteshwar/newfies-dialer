@@ -448,8 +448,8 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 #PLIVO CREDENTIALS
-PLIVO_AUTH_ID = 'MAOGE1YWFHNGFIMZI2MG'
-PLIVO_AUTH_TOKEN = 'YzQ1YTBlYTM5NjBmZGI2MzZlMTNmNTI4ZjUxNmZj'
+PLIVO_AUTH_ID = os.environ.get('PLIVO_AUTH_ID','XXXXXXXXXXXXXXX')
+PLIVO_AUTH_TOKEN = os.environ.get('PLIVO_AUTH_TOKEN','YYYYYYYYYY')
 
 # ADD 'dummy','plivo','twilio','esl'
 NEWFIES_DIALER_ENGINE = 'plivo'
