@@ -324,6 +324,8 @@ AUTH_PROFILE_MODULE = 'user_profile.UserProfile'
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/pleaselog/'
 
+RECORDING_PATH = '/usr/share/newfies/usermedia/recording/'
+
 #DILLA SETTINGS
 #==============
 DICTIONARY = "/usr/share/dict/words"
@@ -431,6 +433,9 @@ LOCALE_PATHS = (
 )
 
 LANGUAGE_COOKIE_NAME = 'newfies_dialer_language'
+
+HOST = '198.61.169.210:8000'
+
 
 #DJANGO-ADMIN-TOOL
 #=================
