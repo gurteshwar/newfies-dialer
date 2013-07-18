@@ -16,6 +16,7 @@ class OutboundCall:
             self.campaign = self.obj_callrequest.campaign
             self.contact = self.obj_callrequest.subscriber.contact
             self.app_type = self.campaign.get_campaign_type()
+            self.xml_added = []
             self.audio_file = AudioFile.objects.filter(user=self.obj_callrequest.user)
             self.response = Response()
             if self.app_type == 'survey':
@@ -47,9 +48,6 @@ class OutboundCall:
         self.campaign.save()
         return self.response
 
-    def transferCall(self):
-        pass 
-
     def add_record(self):
         action_url = 'http://' + settings.HOST + '/plivo_cloud/recv_recording/' + str(self.current_section.id)
         self.response.addRecord(action=action_url,redirect=False)
@@ -59,14 +57,21 @@ class OutboundCall:
         if retries == 0 :
             retries += 1
         timeout = self.current_section.timeout
-        number_digits = self.current_section.number_digits
+        valid_digits = '123456789'
+        number_digits = 1
+        if self.current_section.type == SECTION_TYPE.CAPTURE_DIGITS:
+            number_digits = self.current_section.number_digits
+        elif self.current_section.type == SECTION_TYPE.MULTI_CHOICE:
+            valid_digits = self.current_section.build_dtmf_filter()
         action_url = 'http://' + settings.HOST + '/plivo_cloud/recv_dtmf/' + str(self.current_section.id)
-        valid_digits = None
-        if self.current_section.validate_number:
-            valid_digits = ''.join(map(str,xrange(self.current_section.min_number,
-                                                  self.current_section.max_number)))
         self.response.addGetDigits(action=action_url,timeout=timeout,numDigits=number_digits,
                                    retries=retries,validDigits=valid_digits,redirect=False)
+
+    def add_transfer(self):
+        phonenumber = self.current_section.phonenumber
+        action_url = 'http://' + settings.HOST + '/plivo_cloud/call_transfer/' + str(self.current_section.id)
+        dial = self.response.addDial(action=action_url)
+        dial.addNumber(phonenumber)
 
     def inspect_branching(self):
         branch = Branching.objects.get(section=self.current_section)
@@ -85,14 +90,16 @@ class OutboundCall:
             self.add_record()
         elif self.current_section.type == SECTION_TYPE.HANGUP_SECTION:
             self.send_response()
-        elif self.current_section.type == SECTION_TYPE.CAPTURE_DIGITS:
+        elif self.current_section.type in (SECTION_TYPE.CAPTURE_DIGITS,
+                                           SECTION_TYPE.MULTI_CHOICE,
+                                           SECTION_TYPE.RATING_SECTION):
             self.add_getdigits()
+        elif self.current_section.type == SECTION_TYPE.CALL_TRANSFER:
+            self.add_transfer()
         self.xml_added.append(self.current_section)
         self.inspect_branching()
 
     def generate_xml(self):
-        print 'Generating XML response for request_uuid %s' %(self.obj_callrequest)
-        self.xml_added = []
         for section in self.survey_section_list:
             self.current_section = section
             if self.current_section not in self.xml_added:
